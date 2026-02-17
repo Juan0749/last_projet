@@ -12,9 +12,18 @@ Interfaz web simple para registrar pacientes, tratamientos, abonos y alertas por
 
 ## Búsqueda
 
-- Usa el campo **Palabra clave** y/o **Fecha de ingreso** para filtrar resultados.
+- El buscador se abre/cierra con un botón de icono.
+- Puedes filtrar por **palabra clave**, **fecha inicio** y **fecha fin**.
 - La búsqueda no discrimina entre mayúsculas y minúsculas.
 - Los nuevos registros se almacenan en MAYÚSCULAS para mantener consistencia.
+
+## Alertas y saldos
+
+- Se muestra alerta cuando el paciente tiene deuda pendiente y pasaron más de 10 días desde la fecha de ingreso.
+- En la tabla se muestra estado de saldo:
+  - `FALTANTE` (resaltado en rojo).
+  - `A FAVOR` cuando pagó de más.
+  - `AL DÍA` cuando no hay diferencia.
 
 ## Nota técnica
 
