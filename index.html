@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Control de Pacientes y Tratamientos</title>
+    <style>
+      :root {
+        font-family: Arial, sans-serif;
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        background: #f4f7fb;
+        color: #1d2733;
+      }
+      .container {
+        width: min(1100px, 92vw);
+        margin: 1.5rem auto 3rem;
+      }
+      h1,
+      h2 {
+        margin-bottom: 0.6rem;
+      }
+      .panel {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(18, 46, 77, 0.08);
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+      }
+      form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.8rem;
+      }
+      label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+        font-size: 0.92rem;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 0.65rem;
+        border-radius: 8px;
+        border: 1px solid #bfd1ea;
+        font-size: 0.95rem;
+        box-sizing: border-box;
+      }
+      button {
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .btn-primary {
+        background: #1867c0;
+        color: white;
+      }
+      .btn-secondary {
+        background: #dce8f7;
+        color: #14385e;
+      }
+      .actions {
+        align-self: end;
+        display: flex;
+        gap: 0.6rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.65rem 0.5rem;
+        border-bottom: 1px solid #e6edf7;
+      }
+      th {
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #4c6078;
+      }
+      .warning {
+        color: #9a3412;
+        background: #ffedd5;
+        border: 1px solid #fdba74;
+        border-radius: 8px;
+        padding: 0.8rem;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.55rem;
+        border-radius: 99px;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .badge.pending {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge.paid {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .empty {
+        color: #60758d;
+        font-style: italic;
+      }
+      @media (max-width: 700px) {
+        .actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Ingresos de Pacientes</h1>
+      <section class="panel">
+        <h2>Registrar tratamiento</h2>
+        <form id="patientForm">
+          <div>
+            <label for="patientName">Nombre del paciente</label>
+            <input id="patientName" name="patientName" required placeholder="Ej: Ana López" />
+          </div>
+          <div>
+            <label for="productCode">Producto/Tratamiento</label>
+            <select id="productCode" name="productCode"></select>
+          </div>
+          <div>
+            <label for="customTreatment">Detalle del tratamiento</label>
+            <input
+              id="customTreatment" name="customTreatment"
+              placeholder="Ej: Rec poste / Rec post endo / Rec estética"
+              required
+            />
+          </div>
+          <div>
+            <label for="paidAmount">Abono inicial</label>
+            <input id="paidAmount" name="paidAmount" type="number" min="0" step="0.01" value="0" required />
+          </div>
+          <div>
+            <label for="admissionDate">Fecha de ingreso</label>
+            <input id="admissionDate" name="admissionDate" type="date" required />
+          </div>
+          <div class="actions">
+            <button class="btn-primary" type="submit">Guardar paciente</button>
+            <button class="btn-secondary" id="seedDemo" type="button">Cargar demo</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Advertencias de deuda (+10 días)</h2>
+        <div id="warnings"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Listado de pacientes</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Producto</th>
+              <th>Tratamiento</th>
+              <th>Total</th>
+              <th>Abonado</th>
+              <th>Saldo</th>
+              <th>Ingreso</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="patientsTable"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      const STORAGE_KEY = "pacientes_tratamientos";
+      const WARNING_DAYS = 10;
+
+      const productCodeElement = document.getElementById("productCode");
+      const patientForm = document.getElementById("patientForm");
+      const warningsElement = document.getElementById("warnings");
+      const patientsTableElement = document.getElementById("patientsTable");
+      const seedDemoButton = document.getElementById("seedDemo");
+
+      const products = Array.from({ length: 50 }, (_, index) => {
+        const code = index + 1;
+        return {
+          code,
+          name: `Producto ${code}`,
+          price: 50 + code * 15,
+        };
+      });
+
+      const money = (amount) =>
+        new Intl.NumberFormat("es-ES", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount);
+
+      const daysBetween = (firstDate, secondDate) => {
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const start = new Date(firstDate);
+        const end = new Date(secondDate);
+        return Math.floor((end - start) / msPerDay);
+      };
+
+      const findProductByCode = (code) =>
+        products.find((product) => product.code === Number(code));
+
+      const getPatients = () => {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      };
+
+      const savePatients = (patients) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
+      };
+
+      const renderProductOptions = () => {
+        productCodeElement.innerHTML = products
+          .map(
+            (product) =>
+              `<option value="${product.code}">${product.name} - ${money(product.price)}</option>`,
+          )
+          .join("");
+      };
+
+      const renderWarnings = (patients) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const delayed = patients.filter((patient) => {
+          const pending = patient.totalPrice - patient.paidAmount;
+          return pending > 0 && daysBetween(patient.admissionDate, today) > WARNING_DAYS;
+        });
+
+        if (!delayed.length) {
+          warningsElement.innerHTML = '<p class="empty">Sin alertas por ahora.</p>';
+          return;
+        }
+
+        warningsElement.innerHTML = delayed
+          .map((patient) => {
+            const overdueDays = daysBetween(patient.admissionDate, today);
+            const debt = patient.totalPrice - patient.paidAmount;
+            return `<div class="warning"><strong>${patient.name}</strong> tiene <strong>${overdueDays} días</strong> desde su ingreso y mantiene una deuda de <strong>${money(
+              debt,
+            )}</strong>.</div>`;
+          })
+          .join("");
+      };
+
+      const renderPatients = () => {
+        const patients = getPatients();
+
+        if (!patients.length) {
+          patientsTableElement.innerHTML =
+            '<tr><td colspan="8" class="empty">No hay pacientes registrados.</td></tr>';
+          renderWarnings(patients);
+          return;
+        }
+
+        patientsTableElement.innerHTML = patients
+          .map((patient) => {
+            const balance = patient.totalPrice - patient.paidAmount;
+            const paid = balance <= 0;
+            return `<tr>
+              <td>${patient.name}</td>
+              <td>${patient.productName}</td>
+              <td>${patient.customTreatment}</td>
+              <td>${money(patient.totalPrice)}</td>
+              <td>${money(patient.paidAmount)}</td>
+              <td>${money(Math.max(0, balance))}</td>
+              <td>${patient.admissionDate}</td>
+              <td><span class="badge ${paid ? "paid" : "pending"}">${paid ? "Pagado" : "Pendiente"}</span></td>
+            </tr>`;
+          })
+          .join("");
+
+        renderWarnings(patients);
+      };
+
+      const registerPatient = (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(patientForm);
+        const product = findProductByCode(formData.get("productCode") || productCodeElement.value);
+
+        const patient = {
+          id: crypto.randomUUID(),
+          name: formData.get("patientName")?.trim() || document.getElementById("patientName").value.trim(),
+          productCode: product.code,
+          productName: product.name,
+          customTreatment:
+            formData.get("customTreatment")?.trim() ||
+            document.getElementById("customTreatment").value.trim(),
+          totalPrice: product.price,
+          paidAmount: Number(formData.get("paidAmount") || document.getElementById("paidAmount").value),
+          admissionDate:
+            formData.get("admissionDate") || document.getElementById("admissionDate").value,
+        };
+
+        if (!patient.name || !patient.customTreatment || !patient.admissionDate) {
+          return;
+        }
+
+        const patients = getPatients();
+        patients.unshift(patient);
+        savePatients(patients);
+        patientForm.reset();
+        document.getElementById("paidAmount").value = "0";
+        document.getElementById("admissionDate").value = new Date().toISOString().slice(0, 10);
+        renderPatients();
+      };
+
+      const seedDemoData = () => {
+        const today = new Date();
+        const elevenDaysAgo = new Date(today);
+        elevenDaysAgo.setDate(today.getDate() - 11);
+
+        const samplePatients = [
+          {
+            id: crypto.randomUUID(),
+            name: "Carlos Pérez",
+            productCode: 8,
+            productName: "Producto 8",
+            customTreatment: "Rec poste",
+            totalPrice: findProductByCode(8).price,
+            paidAmount: 40,
+            admissionDate: elevenDaysAgo.toISOString().slice(0, 10),
+          },
+          {
+            id: crypto.randomUUID(),
+            name: "Julia Morales",
+            productCode: 3,
+            productName: "Producto 3",
+            customTreatment: "Rec estética",
+            totalPrice: findProductByCode(3).price,
+            paidAmount: findProductByCode(3).price,
+            admissionDate: today.toISOString().slice(0, 10),
+          },
+        ];
+
+        savePatients(samplePatients);
+        renderPatients();
+      };
+
+      patientForm.addEventListener("submit", registerPatient);
+      seedDemoButton.addEventListener("click", seedDemoData);
+
+      renderProductOptions();
+      document.getElementById("admissionDate").value = new Date().toISOString().slice(0, 10);
+      renderPatients();
+    </script>
+  </body>
+</html>
