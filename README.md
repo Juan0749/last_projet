@@ -1,22 +1,24 @@
 # Control de Pacientes
 
-Abrir `index.html` en el navegador para registrar pacientes, tratamientos, abonos y alertas de deuda tras 10 días.
+Interfaz web simple para registrar pacientes, tratamientos, abonos y alertas por deudas mayores a 10 días.
+
+## Uso rápido
+
+1. Abre `index.html` en Chrome/Edge.
+2. Pulsa **Crear archivo en Documentos** para generar un JSON en tu carpeta Documentos.
+3. Si ya tienes un archivo, pulsa **Seleccionar archivo existente**.
+4. Cada nuevo paciente se guarda en memoria y, si hay archivo activo, también se escribe en ese archivo.
+5. Al refrescar, la página intenta recuperar automáticamente el último archivo usado (si el navegador mantiene permisos).
+
+## Nota técnica
+
+La escritura en archivos locales usa **File System Access API** (Chrome/Edge). En navegadores sin soporte, funcionará solo el respaldo local en `localStorage`.
 
 ## Instalar `xmllint`
 
-`xmllint` viene dentro del paquete **libxml2** (o `libxml2-utils` según distro). Ejemplos:
+- Ubuntu / Debian: `sudo apt update && sudo apt install -y libxml2-utils`
+- Fedora / RHEL / CentOS: `sudo dnf install -y libxml2`
+- Alpine: `sudo apk add libxml2-utils`
+- macOS (Homebrew): `brew install libxml2`
 
-- Ubuntu / Debian:
-  - `sudo apt update && sudo apt install -y libxml2-utils`
-- Fedora / RHEL / CentOS:
-  - `sudo dnf install -y libxml2`
-- Alpine:
-  - `sudo apk add libxml2-utils`
-- macOS (Homebrew):
-  - `brew install libxml2`
-  - opcional para dejarlo en PATH:
-    - `echo 'export PATH="$(brew --prefix libxml2)/bin:$PATH"' >> ~/.zshrc`
-
-Verificar:
-
-- `xmllint --version`
+Verificación: `xmllint --version`
