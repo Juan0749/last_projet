@@ -94,6 +94,25 @@
         </form>
       </section>
 
+
+      <section class="box">
+        <h2>Buscador</h2>
+        <div class="grid">
+          <div>
+            <label for="searchText">Palabra clave (paciente, tratamiento o producto)</label>
+            <input id="searchText" type="text" placeholder="Ej: REC POSTE / ANA / PRODUCTO 8" />
+          </div>
+          <div>
+            <label for="searchDate">Fecha de ingreso</label>
+            <input id="searchDate" type="date" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="clearSearchBtn" type="button">Limpiar búsqueda</button>
+          </div>
+        </div>
+      </section>
+
       <section class="box">
         <h2>Alertas (+10 días con deuda)</h2>
         <div id="warnings" class="muted">Sin alertas.</div>
@@ -126,6 +145,9 @@
       const warningsEl = document.getElementById("warnings");
       const fileStatusEl = document.getElementById("fileStatus");
       const productEl = document.getElementById("product");
+      const searchTextEl = document.getElementById("searchText");
+      const searchDateEl = document.getElementById("searchDate");
+      const clearSearchBtn = document.getElementById("clearSearchBtn");
 
       const products = Array.from({ length: 50 }, (_, i) => ({
         code: i + 1,
@@ -143,11 +165,31 @@
         productEl.innerHTML = products.map((p) => `<option value="${p.code}">${p.name} - ${fmt(p.price)}</option>`).join("");
       }
 
+      function normalize(value) {
+        return String(value || "").toUpperCase();
+      }
+
+      function applyFilters(patients) {
+        const query = normalize(searchTextEl.value).trim();
+        const date = searchDateEl.value;
+
+        return patients.filter((p) => {
+          const matchesDate = !date || p.date === date;
+          if (!matchesDate) return false;
+
+          if (!query) return true;
+          const haystack = normalize(`${p.name} ${p.productName} ${p.treatment}`);
+          return haystack.includes(query);
+        });
+      }
+
       function render() {
-        if (!data.patients.length) {
-          rowsEl.innerHTML = '<tr><td colspan="7" class="muted">No hay pacientes.</td></tr>';
+        const filteredPatients = applyFilters(data.patients);
+
+        if (!filteredPatients.length) {
+          rowsEl.innerHTML = '<tr><td colspan="7" class="muted">No hay resultados.</td></tr>';
         } else {
-          rowsEl.innerHTML = data.patients.map((p) => {
+          rowsEl.innerHTML = filteredPatients.map((p) => {
             const balance = Math.max(0, p.total - p.paid);
             return `<tr>
               <td>${p.name}</td><td>${p.productName}</td><td>${p.treatment}</td><td>${fmt(p.total)}</td><td>${fmt(p.paid)}</td><td>${fmt(balance)}</td><td>${p.date}</td>
@@ -273,10 +315,10 @@
 
         const patient = {
           id: crypto.randomUUID(),
-          name: String(fd.get("name") || "").trim(),
+          name: normalize(String(fd.get("name") || "").trim()),
           productCode: product.code,
-          productName: product.name,
-          treatment: String(fd.get("treatment") || "").trim(),
+          productName: normalize(product.name),
+          treatment: normalize(String(fd.get("treatment") || "").trim()),
           total: product.price,
           paid: Number(fd.get("paid") || 0),
           date: String(fd.get("date") || ""),
@@ -295,6 +337,14 @@
       document.getElementById("createFileBtn").addEventListener("click", chooseCreateFile);
       document.getElementById("openFileBtn").addEventListener("click", chooseOpenFile);
       document.getElementById("saveBtn").addEventListener("click", writeFile);
+
+      searchTextEl.addEventListener("input", render);
+      searchDateEl.addEventListener("change", render);
+      clearSearchBtn.addEventListener("click", () => {
+        searchTextEl.value = "";
+        searchDateEl.value = "";
+        render();
+      });
 
       renderProducts();
       document.getElementById("date").value = new Date().toISOString().slice(0, 10);

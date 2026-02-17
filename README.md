@@ -10,6 +10,12 @@ Interfaz web simple para registrar pacientes, tratamientos, abonos y alertas por
 4. Cada nuevo paciente se guarda en memoria y, si hay archivo activo, también se escribe en ese archivo.
 5. Al refrescar, la página intenta recuperar automáticamente el último archivo usado (si el navegador mantiene permisos).
 
+## Búsqueda
+
+- Usa el campo **Palabra clave** y/o **Fecha de ingreso** para filtrar resultados.
+- La búsqueda no discrimina entre mayúsculas y minúsculas.
+- Los nuevos registros se almacenan en MAYÚSCULAS para mantener consistencia.
+
 ## Nota técnica
 
 La escritura en archivos locales usa **File System Access API** (Chrome/Edge). En navegadores sin soporte, funcionará solo el respaldo local en `localStorage`.
