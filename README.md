@@ -5,7 +5,10 @@ Aplicación web local para controlar pacientes, pagos y deudas.
 ## Cambios clave solicitados
 
 - **Archivo de trabajo oculto/expandible**.
-- Guarda datos en **Documentos/INGRESOS/ingresos_data.json** (vía File System Access API en Chrome/Edge).
+- Archivo de trabajo en modo simple (como versión anterior):
+  - Crear archivo en Documentos.
+  - Seleccionar archivo existente.
+  - Guardar manualmente.
 - **Nuevo ingreso** con método de pago: `EFECTIVO` o `TARJETA`.
 - Se eliminó catálogo fijo de 50 productos y tratamientos.
 - Nuevo módulo de **productos manuales** (crear/eliminar), persistentes en el mismo archivo local.
@@ -17,7 +20,7 @@ Aplicación web local para controlar pacientes, pagos y deudas.
 ## Flujo recomendado
 
 1. Abrir `index.html` en Chrome/Edge.
-2. En **Archivo de trabajo** > **Configurar carpeta INGRESOS (Documentos)**.
+2. En **Archivo de trabajo** > **Crear archivo en Documentos** o **Seleccionar archivo existente**.
 3. Crear productos en **Productos manuales**.
 4. Registrar pacientes en **Nuevo ingreso**.
 5. Usar **Editar / Pago** para actualizar datos y agregar pagos faltantes.

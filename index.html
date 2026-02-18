@@ -139,11 +139,11 @@
           <button id="toggleFileBtn" class="toggle-btn" type="button">Expandir</button>
         </div>
         <div id="fileBody" class="card-body hidden">
-          <p id="fileStatus" class="muted">Sin carpeta de trabajo configurada.</p>
+          <p id="fileStatus" class="muted">Sin archivo seleccionado.</p>
           <div class="row-btns">
-            <button id="setupFolderBtn" type="button">Configurar carpeta INGRESOS (Documentos)</button>
-            <button id="openDataBtn" type="button">Abrir archivo de INGRESOS</button>
-            <button id="saveDataBtn" type="button">Guardar ahora</button>
+            <button id="createFileBtn" type="button">Crear archivo en Documentos</button>
+            <button id="openFileBtn" type="button">Seleccionar archivo existente</button>
+            <button id="saveFileBtn" type="button">Guardar ahora</button>
           </div>
         </div>
       </section>
@@ -334,9 +334,6 @@
       const STORE_NAME = "handles";
       const LOCAL_KEY = "ingresos_backup";
       const WARNING_DAYS = 10;
-      const DATA_FILE_NAME = "ingresos_data.json";
-
-      let directoryHandle = null;
       let fileHandle = null;
       let state = {
         products: [],
@@ -535,7 +532,7 @@
         await writable.write(JSON.stringify(state, null, 2));
         await writable.close();
         localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
-        fileStatusEl.textContent = `Archivo activo: INGRESOS/${fileHandle.name}`;
+        fileStatusEl.textContent = `Archivo activo: ${fileHandle.name}`;
       }
 
       async function readDataFile() {
@@ -549,42 +546,42 @@
           state.patients = Array.isArray(parsed.patients) ? parsed.patients : [];
           localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
           renderAll();
-          fileStatusEl.textContent = `Archivo activo: INGRESOS/${fileHandle.name}`;
+          fileStatusEl.textContent = `Archivo activo: ${fileHandle.name}`;
         } catch {
           fileStatusEl.textContent = "No se pudo leer el archivo. Se usa respaldo local.";
           renderAll();
         }
       }
 
-      async function setupIngresosFolder() {
-        if (!("showDirectoryPicker" in window)) {
-          fileStatusEl.textContent = "Tu navegador no soporta directorios locales (usa Chrome/Edge).";
+      async function createDataFile() {
+        if (!("showSaveFilePicker" in window)) {
+          fileStatusEl.textContent = "Tu navegador no soporta File System Access API (usa Chrome/Edge).";
           return;
         }
 
-        const docsHandle = await window.showDirectoryPicker({ startIn: "documents" });
-        directoryHandle = await docsHandle.getDirectoryHandle("INGRESOS", { create: true });
-        fileHandle = await directoryHandle.getFileHandle(DATA_FILE_NAME, { create: true });
+        fileHandle = await window.showSaveFilePicker({
+          suggestedName: `ingresos_data_${new Date().toISOString().slice(0, 10)}.json`,
+          startIn: "documents",
+          types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
+        });
 
-        await idbSet("directoryHandle", directoryHandle);
         await idbSet("fileHandle", fileHandle);
         await writeDataFile();
       }
 
-      async function openIngresosDataFile() {
-        if (!("showDirectoryPicker" in window)) {
-          fileStatusEl.textContent = "Tu navegador no soporta directorios locales (usa Chrome/Edge).";
+      async function openDataFile() {
+        if (!("showOpenFilePicker" in window)) {
+          fileStatusEl.textContent = "Tu navegador no soporta File System Access API (usa Chrome/Edge).";
           return;
         }
 
-        const docsHandle = await window.showDirectoryPicker({ startIn: "documents" });
-        const ingresosHandle = await docsHandle.getDirectoryHandle("INGRESOS", { create: true });
-        const dataHandle = await ingresosHandle.getFileHandle(DATA_FILE_NAME, { create: true });
+        const [handle] = await window.showOpenFilePicker({
+          startIn: "documents",
+          multiple: false,
+          types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
+        });
+        fileHandle = handle;
 
-        directoryHandle = ingresosHandle;
-        fileHandle = dataHandle;
-
-        await idbSet("directoryHandle", directoryHandle);
         await idbSet("fileHandle", fileHandle);
         await readDataFile();
       }
@@ -620,22 +617,21 @@
         renderAll();
 
         try {
-          directoryHandle = await idbGet("directoryHandle");
           fileHandle = await idbGet("fileHandle");
           if (fileHandle) {
             await readDataFile();
           }
         } catch {
-          fileStatusEl.textContent = "No se recuperó handle previo; usa Configurar carpeta INGRESOS.";
+          fileStatusEl.textContent = "No se recuperó archivo previo.";
         }
       }
 
       byId("toggleFileBtn").addEventListener("click", () => toggleSection(fileBody, byId("toggleFileBtn")));
       byId("toggleSearchBtn").addEventListener("click", () => toggleSection(searchBody, byId("toggleSearchBtn")));
 
-      byId("setupFolderBtn").addEventListener("click", setupIngresosFolder);
-      byId("openDataBtn").addEventListener("click", openIngresosDataFile);
-      byId("saveDataBtn").addEventListener("click", writeDataFile);
+      byId("createFileBtn").addEventListener("click", createDataFile);
+      byId("openFileBtn").addEventListener("click", openDataFile);
+      byId("saveFileBtn").addEventListener("click", writeDataFile);
 
       byId("productForm").addEventListener("submit", async (e) => {
         e.preventDefault();
