@@ -4,7 +4,7 @@ Aplicación web local para controlar pacientes, pagos y deudas.
 
 ## Cambios clave solicitados
 
-- **Archivo de trabajo oculto/expandible**.
+- **Archivo de trabajo oculto/expandible** desde botón en header.
 - Archivo de trabajo en modo simple (como versión anterior):
   - Crear archivo en Documentos.
   - Seleccionar archivo existente.
@@ -16,6 +16,11 @@ Aplicación web local para controlar pacientes, pagos y deudas.
 - Se puede **editar paciente** y **agregar nuevos pagos** (separados de pago inicial), mostrando historial con fechas.
 - Alertas por deuda >10 días desde el último pago.
 - Estado de saldo en tabla: `FALTANTE` (rojo), `A FAVOR`, `AL DÍA`.
+
+## Interfaz
+
+- En la parte superior derecha del header hay botones para: **Archivo de trabajo**, **Productos manuales** y **Buscador**.
+- Cada botón expande/oculta su panel correspondiente.
 
 ## Flujo recomendado
 

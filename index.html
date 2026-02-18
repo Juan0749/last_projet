@@ -16,6 +16,23 @@
         margin: 1rem auto 2rem;
         padding: 0 1rem;
       }
+      .top-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        gap: 1rem;
+      }
+      .top-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .top-actions button {
+        width: auto;
+        min-width: 165px;
+      }
       .card {
         background: #fff;
         border: 1px solid #dbe4f0;
@@ -131,12 +148,18 @@
   </head>
   <body>
     <main>
-      <h1>INGRESOS - Pacientes</h1>
+      <div class="top-header">
+        <h1>INGRESOS - Pacientes</h1>
+        <div class="top-actions">
+          <button id="headerFileBtn" class="toggle-btn" type="button">Archivo de trabajo</button>
+          <button id="headerProductsBtn" class="toggle-btn" type="button">Productos manuales</button>
+          <button id="headerSearchBtn" class="toggle-btn" type="button">Buscador</button>
+        </div>
+      </div>
 
       <section class="card">
         <div class="card-header">
           <h2>Archivo de trabajo</h2>
-          <button id="toggleFileBtn" class="toggle-btn" type="button">Expandir</button>
         </div>
         <div id="fileBody" class="card-body hidden">
           <p id="fileStatus" class="muted">Sin archivo seleccionado.</p>
@@ -152,7 +175,7 @@
         <div class="card-header">
           <h2>Productos manuales</h2>
         </div>
-        <div class="card-body">
+        <div id="productsBody" class="card-body hidden">
           <form id="productForm" class="grid">
             <div>
               <label for="productName">Nombre del producto</label>
@@ -219,7 +242,6 @@
       <section class="card">
         <div class="card-header">
           <h2>Buscador</h2>
-          <button id="toggleSearchBtn" class="toggle-btn" type="button">Expandir</button>
         </div>
         <div id="searchBody" class="card-body hidden">
           <div class="grid" style="max-width: 820px; margin: 0 auto;">
@@ -345,13 +367,14 @@
       const normalize = (v) => String(v || "").trim().toUpperCase();
 
       const fileBody = byId("fileBody");
+      const productsBody = byId("productsBody");
       const searchBody = byId("searchBody");
       const warningsEl = byId("warnings");
       const fileStatusEl = byId("fileStatus");
 
-      function toggleSection(bodyEl, btnEl) {
+      function toggleSection(bodyEl, btnEl, label) {
         const hidden = bodyEl.classList.toggle("hidden");
-        btnEl.textContent = hidden ? "Expandir" : "Ocultar";
+        btnEl.textContent = hidden ? label : `${label} (Ocultar)`;
       }
 
       function parseDateSafe(text) {
@@ -626,8 +649,9 @@
         }
       }
 
-      byId("toggleFileBtn").addEventListener("click", () => toggleSection(fileBody, byId("toggleFileBtn")));
-      byId("toggleSearchBtn").addEventListener("click", () => toggleSection(searchBody, byId("toggleSearchBtn")));
+      byId("headerFileBtn").addEventListener("click", () => toggleSection(fileBody, byId("headerFileBtn"), "Archivo de trabajo"));
+      byId("headerProductsBtn").addEventListener("click", () => toggleSection(productsBody, byId("headerProductsBtn"), "Productos manuales"));
+      byId("headerSearchBtn").addEventListener("click", () => toggleSection(searchBody, byId("headerSearchBtn"), "Buscador"));
 
       byId("createFileBtn").addEventListener("click", createDataFile);
       byId("openFileBtn").addEventListener("click", openDataFile);
