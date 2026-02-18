@@ -3,74 +3,82 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Control simple de pacientes</title>
+    <title>INGRESOS - Control de Pacientes</title>
     <style>
       body {
-        font-family: system-ui, Arial, sans-serif;
         margin: 0;
-        background: #f5f7fb;
-        color: #1d2633;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #f4f7fb;
+        color: #1a2433;
       }
       main {
-        max-width: 980px;
+        max-width: 1050px;
         margin: 1rem auto 2rem;
         padding: 0 1rem;
       }
-      .box {
+      .card {
         background: #fff;
-        border: 1px solid #dbe3ef;
+        border: 1px solid #dbe4f0;
         border-radius: 10px;
-        padding: 1rem;
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.85rem;
+        overflow: hidden;
       }
-      h1,
-      h2 {
-        margin: 0 0 0.7rem;
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 1rem;
+        background: #f8fbff;
+        border-bottom: 1px solid #e6edf7;
+      }
+      .card-header h2 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+      .card-body {
+        padding: 0.9rem 1rem 1rem;
+      }
+      .hidden {
+        display: none;
+      }
+      .toggle-btn {
+        border: 1px solid #c6d4e8;
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 0.35rem 0.7rem;
+        font-weight: 700;
+        cursor: pointer;
       }
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 0.6rem;
-      }
-      .grid-centered {
-        max-width: 760px;
-        margin: 0 auto;
       }
       label {
         font-size: 0.9rem;
-        font-weight: 600;
+        font-weight: 700;
       }
       input,
       select,
       button {
         width: 100%;
         box-sizing: border-box;
-        padding: 0.55rem;
-        border-radius: 8px;
-        border: 1px solid #bdd0e8;
         margin-top: 0.2rem;
+        border: 1px solid #bfd0e8;
+        border-radius: 8px;
+        padding: 0.55rem;
       }
       button {
         cursor: pointer;
         font-weight: 700;
       }
+      .muted {
+        color: #5c7088;
+      }
       .row-btns {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-        gap: 0.5rem;
-      }
-      .search-toggle {
-        display: inline-flex;
-        align-items: center;
         gap: 0.45rem;
-        width: auto;
-        padding: 0.45rem 0.75rem;
-      }
-      .search-panel {
-        margin-top: 0.7rem;
-      }
-      .hidden {
-        display: none;
       }
       table {
         width: 100%;
@@ -79,28 +87,18 @@
       }
       th,
       td {
-        border-bottom: 1px solid #e6edf7;
+        border-bottom: 1px solid #e8eef7;
         padding: 0.5rem;
         text-align: left;
-      }
-      .warn {
-        background: #fff0e8;
-        color: #8a2d0f;
-        border: 1px solid #f1b394;
-        border-radius: 8px;
-        padding: 0.5rem;
-        margin-bottom: 0.4rem;
-      }
-      .muted {
-        color: #5f7086;
+        vertical-align: top;
       }
       .status-debt {
-        color: #b42318;
-        font-weight: 800;
         background: #fee4e2;
         border: 1px solid #fecdca;
+        color: #b42318;
+        font-weight: 800;
+        padding: 0.18rem 0.45rem;
         border-radius: 6px;
-        padding: 0.2rem 0.45rem;
       }
       .status-favor {
         color: #067647;
@@ -110,63 +108,124 @@
         color: #175cd3;
         font-weight: 700;
       }
+      .warn {
+        background: #fff0e8;
+        color: #8a2d0f;
+        border: 1px solid #f1b394;
+        border-radius: 8px;
+        padding: 0.6rem;
+        margin-bottom: 0.4rem;
+      }
+      .sub-card {
+        background: #fafcff;
+        border: 1px solid #e6edf7;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 0.7rem;
+      }
+      .history {
+        margin: 0.3rem 0 0;
+        padding-left: 1.1rem;
+      }
     </style>
   </head>
   <body>
     <main>
-      <h1>Control simple de pacientes</h1>
+      <h1>INGRESOS - Pacientes</h1>
 
-      <section class="box">
-        <h2>Archivo de trabajo</h2>
-        <p id="fileStatus" class="muted">Sin archivo seleccionado.</p>
-        <div class="row-btns">
-          <button id="createFileBtn" type="button">Crear archivo en Documentos</button>
-          <button id="openFileBtn" type="button">Seleccionar archivo existente</button>
-          <button id="saveBtn" type="button">Guardar ahora</button>
+      <section class="card">
+        <div class="card-header">
+          <h2>Archivo de trabajo</h2>
+          <button id="toggleFileBtn" class="toggle-btn" type="button">Expandir</button>
+        </div>
+        <div id="fileBody" class="card-body hidden">
+          <p id="fileStatus" class="muted">Sin carpeta de trabajo configurada.</p>
+          <div class="row-btns">
+            <button id="setupFolderBtn" type="button">Configurar carpeta INGRESOS (Documentos)</button>
+            <button id="openDataBtn" type="button">Abrir archivo de INGRESOS</button>
+            <button id="saveDataBtn" type="button">Guardar ahora</button>
+          </div>
         </div>
       </section>
 
-      <section class="box">
-        <h2>Nuevo ingreso</h2>
-        <form id="patientForm" class="grid">
-          <div>
-            <label for="name">Paciente</label>
-            <input id="name" name="name" required />
+      <section class="card">
+        <div class="card-header">
+          <h2>Productos manuales</h2>
+        </div>
+        <div class="card-body">
+          <form id="productForm" class="grid">
+            <div>
+              <label for="productName">Nombre del producto</label>
+              <input id="productName" required placeholder="EJ: CORONA CERÁMICA" />
+            </div>
+            <div>
+              <label for="productPrice">Valor</label>
+              <input id="productPrice" type="number" min="0" step="0.01" required placeholder="0.00" />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button type="submit">Añadir producto</button>
+            </div>
+          </form>
+          <div class="sub-card">
+            <strong>Productos guardados</strong>
+            <table>
+              <thead>
+                <tr><th>Producto</th><th>Valor</th><th>Acción</th></tr>
+              </thead>
+              <tbody id="productsRows"></tbody>
+            </table>
           </div>
-          <div>
-            <label for="product">Producto (1-50)</label>
-            <select id="product" name="product"></select>
-          </div>
-          <div>
-            <label for="treatment">Tratamiento</label>
-            <input id="treatment" name="treatment" placeholder="Ej: rec poste" required />
-          </div>
-          <div>
-            <label for="paid">Abono</label>
-            <input id="paid" name="paid" type="number" min="0" step="0.01" value="0" required />
-          </div>
-          <div>
-            <label for="date">Fecha ingreso</label>
-            <input id="date" name="date" type="date" required />
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <button type="submit">Agregar paciente</button>
-          </div>
-        </form>
+        </div>
       </section>
 
-      <section class="box">
-        <h2>Buscador</h2>
-        <button id="toggleSearchBtn" class="search-toggle" type="button">
-          <span id="toggleIcon">🔎</span>
-          <span id="toggleText">Abrir búsqueda</span>
-        </button>
-        <div id="searchPanel" class="search-panel hidden">
-          <div class="grid grid-centered">
+      <section class="card">
+        <div class="card-header">
+          <h2>Nuevo ingreso</h2>
+        </div>
+        <div class="card-body">
+          <form id="patientForm" class="grid">
             <div>
-              <label for="searchText">Palabra clave (paciente, tratamiento o producto)</label>
-              <input id="searchText" type="text" placeholder="Ej: REC POSTE / ANA / PRODUCTO 8" />
+              <label for="patientName">Paciente</label>
+              <input id="patientName" required />
+            </div>
+            <div>
+              <label for="patientProduct">Producto</label>
+              <select id="patientProduct" required></select>
+            </div>
+            <div>
+              <label for="paymentMethod">Método de pago inicial</label>
+              <select id="paymentMethod" required>
+                <option value="EFECTIVO">EFECTIVO</option>
+                <option value="TARJETA">TARJETA</option>
+              </select>
+            </div>
+            <div>
+              <label for="initialPaid">Pago inicial</label>
+              <input id="initialPaid" type="number" min="0" step="0.01" value="0" required />
+            </div>
+            <div>
+              <label for="initialDate">Fecha de ingreso</label>
+              <input id="initialDate" type="date" required />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button type="submit">Agregar paciente</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Buscador</h2>
+          <button id="toggleSearchBtn" class="toggle-btn" type="button">Expandir</button>
+        </div>
+        <div id="searchBody" class="card-body hidden">
+          <div class="grid" style="max-width: 820px; margin: 0 auto;">
+            <div>
+              <label for="searchText">Palabra clave</label>
+              <input id="searchText" placeholder="PACIENTE / PRODUCTO" />
             </div>
             <div>
               <label for="searchStartDate">Fecha inicio</label>
@@ -178,130 +237,214 @@
             </div>
             <div>
               <label>&nbsp;</label>
-              <button id="clearSearchBtn" type="button">Limpiar búsqueda</button>
+              <button id="clearSearchBtn" type="button">Limpiar</button>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="box">
-        <h2>Alertas (+10 días con deuda)</h2>
-        <div id="warnings" class="muted">Sin alertas.</div>
+      <section class="card">
+        <div class="card-header">
+          <h2>Alertas (+10 días con deuda)</h2>
+        </div>
+        <div class="card-body">
+          <div id="warnings" class="muted">Sin alertas.</div>
+        </div>
       </section>
 
-      <section class="box">
-        <h2>Pacientes</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Paciente</th>
-              <th>Producto</th>
-              <th>Tratamiento</th>
-              <th>Total</th>
-              <th>Abonado</th>
-              <th>Estado de saldo</th>
-              <th>Ingreso</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
+      <section class="card">
+        <div class="card-header">
+          <h2>Pacientes</h2>
+        </div>
+        <div class="card-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Producto</th>
+                <th>Total</th>
+                <th>Total pagado</th>
+                <th>Estado saldo</th>
+                <th>Pagos (fechas)</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="patientsRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" id="editSection">
+        <div class="card-header">
+          <h2>Editar paciente / Añadir nuevo pago</h2>
+        </div>
+        <div class="card-body">
+          <p id="editTitle" class="muted">Selecciona un paciente para editar.</p>
+
+          <div class="sub-card">
+            <h3>Editar datos generales</h3>
+            <form id="editPatientForm" class="grid">
+              <input type="hidden" id="editPatientId" />
+              <div>
+                <label for="editName">Paciente</label>
+                <input id="editName" />
+              </div>
+              <div>
+                <label for="editProduct">Producto</label>
+                <select id="editProduct"></select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="submit">Guardar cambios</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="sub-card">
+            <h3>Registrar pago faltante / nuevo pago</h3>
+            <form id="addPaymentForm" class="grid">
+              <input type="hidden" id="paymentPatientId" />
+              <div>
+                <label for="newPaymentAmount">Monto nuevo pago</label>
+                <input id="newPaymentAmount" type="number" min="0" step="0.01" required />
+              </div>
+              <div>
+                <label for="newPaymentMethod">Método</label>
+                <select id="newPaymentMethod" required>
+                  <option value="EFECTIVO">EFECTIVO</option>
+                  <option value="TARJETA">TARJETA</option>
+                </select>
+              </div>
+              <div>
+                <label for="newPaymentDate">Fecha nuevo pago</label>
+                <input id="newPaymentDate" type="date" required />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="submit">Agregar pago</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </section>
     </main>
 
     <script>
+      const DB_NAME = "ingresos_local_db";
+      const STORE_NAME = "handles";
+      const LOCAL_KEY = "ingresos_backup";
       const WARNING_DAYS = 10;
-      const LOCAL_DATA_KEY = "clinic_data_backup";
-      const DB_NAME = "clinic_file_db";
-      const STORE_NAME = "kv";
+      const DATA_FILE_NAME = "ingresos_data.json";
 
+      let directoryHandle = null;
       let fileHandle = null;
-      let data = { patients: [] };
+      let state = {
+        products: [],
+        patients: [],
+      };
 
-      const form = document.getElementById("patientForm");
-      const rowsEl = document.getElementById("rows");
-      const warningsEl = document.getElementById("warnings");
-      const fileStatusEl = document.getElementById("fileStatus");
-      const productEl = document.getElementById("product");
-      const searchTextEl = document.getElementById("searchText");
-      const searchStartDateEl = document.getElementById("searchStartDate");
-      const searchEndDateEl = document.getElementById("searchEndDate");
-      const clearSearchBtn = document.getElementById("clearSearchBtn");
-      const toggleSearchBtn = document.getElementById("toggleSearchBtn");
-      const searchPanel = document.getElementById("searchPanel");
-      const toggleText = document.getElementById("toggleText");
-      const toggleIcon = document.getElementById("toggleIcon");
+      const byId = (id) => document.getElementById(id);
+      const fmt = (n) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "USD" }).format(Number(n || 0));
+      const normalize = (v) => String(v || "").trim().toUpperCase();
 
-      const products = Array.from({ length: 50 }, (_, i) => ({
-        code: i + 1,
-        name: `PRODUCTO ${i + 1}`,
-        price: 50 + (i + 1) * 15,
-      }));
+      const fileBody = byId("fileBody");
+      const searchBody = byId("searchBody");
+      const warningsEl = byId("warnings");
+      const fileStatusEl = byId("fileStatus");
 
-      const fmt = (n) =>
-        new Intl.NumberFormat("es-ES", {
-          style: "currency",
-          currency: "USD",
-        }).format(n);
-
-      function normalize(value) {
-        return String(value || "").trim().toUpperCase();
+      function toggleSection(bodyEl, btnEl) {
+        const hidden = bodyEl.classList.toggle("hidden");
+        btnEl.textContent = hidden ? "Expandir" : "Ocultar";
       }
 
-      function parseSafeDate(dateText) {
-        const date = new Date(`${dateText}T00:00:00`);
-        return Number.isNaN(date.getTime()) ? null : date;
+      function parseDateSafe(text) {
+        if (!text) return null;
+        const d = new Date(`${text}T00:00:00`);
+        return Number.isNaN(d.getTime()) ? null : d;
       }
 
-      function daysBetween(dateText, compareText) {
-        const a = parseSafeDate(dateText);
-        const b = parseSafeDate(compareText);
-        if (!a || !b) return -1;
-        return Math.floor((b - a) / 86400000);
+      function daysDiff(fromText, toText) {
+        const from = parseDateSafe(fromText);
+        const to = parseDateSafe(toText);
+        if (!from || !to) return -1;
+        return Math.floor((to - from) / 86400000);
       }
 
-      function renderProducts() {
-        productEl.innerHTML = products
-          .map((p) => `<option value="${p.code}">${p.name} - ${fmt(p.price)}</option>`)
-          .join("");
+      function totalPaid(patient) {
+        return (patient.payments || []).reduce((acc, p) => acc + Number(p.amount || 0), 0);
       }
 
-      function getBalance(patient) {
-        return Number(patient.total || 0) - Number(patient.paid || 0);
+      function balance(patient) {
+        return Number(patient.productPrice || 0) - totalPaid(patient);
       }
 
-      function getBalanceHtml(balance) {
-        if (balance > 0) {
-          return `<span class="status-debt">FALTANTE ${fmt(balance)}</span>`;
-        }
-        if (balance < 0) {
-          return `<span class="status-favor">A FAVOR ${fmt(Math.abs(balance))}</span>`;
-        }
+      function balanceHtml(value) {
+        if (value > 0) return `<span class="status-debt">FALTANTE ${fmt(value)}</span>`;
+        if (value < 0) return `<span class="status-favor">A FAVOR ${fmt(Math.abs(value))}</span>`;
         return '<span class="status-ok">AL DÍA</span>';
       }
 
+      function paymentHistoryHtml(patient) {
+        const payments = patient.payments || [];
+        if (!payments.length) return '<span class="muted">Sin pagos</span>';
+        const lines = payments
+          .map((p) => `${p.date} - ${p.type} - ${p.method} - ${fmt(p.amount)}`)
+          .map((line) => `<li>${line}</li>`)
+          .join("");
+        return `<ul class="history">${lines}</ul>`;
+      }
+
       function applyFilters(patients) {
-        const query = normalize(searchTextEl.value);
-        const startDate = searchStartDateEl.value;
-        const endDate = searchEndDateEl.value;
+        const q = normalize(byId("searchText").value);
+        const start = byId("searchStartDate").value;
+        const end = byId("searchEndDate").value;
 
         return patients.filter((p) => {
-          const recordDate = p.date;
-          const matchesStart = !startDate || recordDate >= startDate;
-          const matchesEnd = !endDate || recordDate <= endDate;
-          if (!matchesStart || !matchesEnd) return false;
-
-          if (!query) return true;
-          const haystack = normalize(`${p.name} ${p.productName} ${p.treatment}`);
-          return haystack.includes(query);
+          const recordDate = p.entryDate || "";
+          const dateOk = (!start || recordDate >= start) && (!end || recordDate <= end);
+          if (!dateOk) return false;
+          if (!q) return true;
+          const haystack = normalize(`${p.name} ${p.productName}`);
+          return haystack.includes(q);
         });
+      }
+
+      function renderProducts() {
+        const rows = byId("productsRows");
+        const productSelect = byId("patientProduct");
+        const editProductSelect = byId("editProduct");
+
+        if (!state.products.length) {
+          rows.innerHTML = '<tr><td colspan="3" class="muted">No hay productos guardados.</td></tr>';
+          productSelect.innerHTML = '<option value="">Primero añade un producto</option>';
+          editProductSelect.innerHTML = '<option value="">Sin productos</option>';
+          return;
+        }
+
+        rows.innerHTML = state.products
+          .map(
+            (p) => `<tr>
+              <td>${p.name}</td>
+              <td>${fmt(p.price)}</td>
+              <td><button type="button" data-del-product="${p.id}">Eliminar</button></td>
+            </tr>`,
+          )
+          .join("");
+
+        const options = state.products.map((p) => `<option value="${p.id}">${p.name} - ${fmt(p.price)}</option>`).join("");
+        productSelect.innerHTML = options;
+        editProductSelect.innerHTML = options;
       }
 
       function renderWarnings() {
         const today = new Date().toISOString().slice(0, 10);
-        const delayed = data.patients.filter((p) => {
-          const days = daysBetween(p.date, today);
-          const debt = getBalance(p);
-          return days > WARNING_DAYS && debt > 0;
+
+        const delayed = state.patients.filter((p) => {
+          const debt = balance(p);
+          if (debt <= 0) return false;
+          const lastPaymentDate = (p.payments || []).slice(-1)[0]?.date || p.entryDate;
+          const overdue = daysDiff(lastPaymentDate, today);
+          return overdue > WARNING_DAYS;
         });
 
         if (!delayed.length) {
@@ -311,36 +454,46 @@
 
         warningsEl.innerHTML = delayed
           .map((p) => {
-            const debt = getBalance(p);
-            const overdueDays = daysBetween(p.date, today);
-            return `<div class="warn"><strong>${p.name}</strong> lleva <strong>${overdueDays} días</strong> con deuda pendiente de <strong>${fmt(debt)}</strong>.</div>`;
+            const debt = balance(p);
+            const lastPaymentDate = (p.payments || []).slice(-1)[0]?.date || p.entryDate;
+            const overdue = daysDiff(lastPaymentDate, today);
+            return `<div class="warn"><strong>${p.name}</strong> tiene deuda de <strong>${fmt(debt)}</strong> y han pasado <strong>${overdue} días</strong> desde su último pago (${lastPaymentDate}).</div>`;
           })
           .join("");
       }
 
-      function render() {
-        const filteredPatients = applyFilters(data.patients);
+      function renderPatients() {
+        const rows = byId("patientsRows");
+        const list = applyFilters(state.patients);
 
-        if (!filteredPatients.length) {
-          rowsEl.innerHTML = '<tr><td colspan="7" class="muted">No hay resultados.</td></tr>';
-        } else {
-          rowsEl.innerHTML = filteredPatients
-            .map((p) => {
-              const balance = getBalance(p);
-              return `<tr>
-              <td>${p.name}</td>
-              <td>${p.productName}</td>
-              <td>${p.treatment}</td>
-              <td>${fmt(p.total)}</td>
-              <td>${fmt(p.paid)}</td>
-              <td>${getBalanceHtml(balance)}</td>
-              <td>${p.date}</td>
-            </tr>`;
-            })
-            .join("");
+        if (!list.length) {
+          rows.innerHTML = '<tr><td colspan="7" class="muted">No hay pacientes para mostrar.</td></tr>';
+          renderWarnings();
+          return;
         }
 
+        rows.innerHTML = list
+          .map((p) => {
+            const paid = totalPaid(p);
+            const b = balance(p);
+            return `<tr>
+              <td>${p.name}</td>
+              <td>${p.productName}</td>
+              <td>${fmt(p.productPrice)}</td>
+              <td>${fmt(paid)}</td>
+              <td>${balanceHtml(b)}</td>
+              <td>${paymentHistoryHtml(p)}</td>
+              <td><button type="button" data-edit-patient="${p.id}">Editar / Pago</button></td>
+            </tr>`;
+          })
+          .join("");
+
         renderWarnings();
+      }
+
+      function renderAll() {
+        renderProducts();
+        renderPatients();
       }
 
       async function openDb() {
@@ -372,132 +525,255 @@
         });
       }
 
-      async function writeFile() {
+      async function writeDataFile() {
         if (!fileHandle) {
-          fileStatusEl.textContent = "Selecciona o crea un archivo primero.";
+          fileStatusEl.textContent = "Primero configura o abre el archivo de trabajo.";
           return;
         }
+
         const writable = await fileHandle.createWritable();
-        await writable.write(JSON.stringify(data, null, 2));
+        await writable.write(JSON.stringify(state, null, 2));
         await writable.close();
-        localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(data));
-        fileStatusEl.textContent = `Archivo activo: ${fileHandle.name}`;
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
+        fileStatusEl.textContent = `Archivo activo: INGRESOS/${fileHandle.name}`;
       }
 
-      async function loadFromFile() {
+      async function readDataFile() {
         if (!fileHandle) return;
+
         try {
           const file = await fileHandle.getFile();
           const text = await file.text();
-          data = text ? JSON.parse(text) : { patients: [] };
-          if (!Array.isArray(data.patients)) data.patients = [];
-          localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(data));
-          render();
-          fileStatusEl.textContent = `Archivo activo: ${fileHandle.name}`;
+          const parsed = text ? JSON.parse(text) : { products: [], patients: [] };
+          state.products = Array.isArray(parsed.products) ? parsed.products : [];
+          state.patients = Array.isArray(parsed.patients) ? parsed.patients : [];
+          localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
+          renderAll();
+          fileStatusEl.textContent = `Archivo activo: INGRESOS/${fileHandle.name}`;
         } catch {
-          fileStatusEl.textContent = "No se pudo leer el archivo. Se usará respaldo local.";
-          render();
+          fileStatusEl.textContent = "No se pudo leer el archivo. Se usa respaldo local.";
+          renderAll();
         }
       }
 
-      async function chooseCreateFile() {
-        if (!("showSaveFilePicker" in window)) {
-          fileStatusEl.textContent = "Tu navegador no soporta File System Access API.";
+      async function setupIngresosFolder() {
+        if (!("showDirectoryPicker" in window)) {
+          fileStatusEl.textContent = "Tu navegador no soporta directorios locales (usa Chrome/Edge).";
           return;
         }
-        const name = `control_pacientes_${new Date().toISOString().slice(0, 10)}.json`;
-        fileHandle = await window.showSaveFilePicker({
-          suggestedName: name,
-          startIn: "documents",
-          types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
-        });
+
+        const docsHandle = await window.showDirectoryPicker({ startIn: "documents" });
+        directoryHandle = await docsHandle.getDirectoryHandle("INGRESOS", { create: true });
+        fileHandle = await directoryHandle.getFileHandle(DATA_FILE_NAME, { create: true });
+
+        await idbSet("directoryHandle", directoryHandle);
         await idbSet("fileHandle", fileHandle);
-        await writeFile();
+        await writeDataFile();
       }
 
-      async function chooseOpenFile() {
-        if (!("showOpenFilePicker" in window)) {
-          fileStatusEl.textContent = "Tu navegador no soporta File System Access API.";
+      async function openIngresosDataFile() {
+        if (!("showDirectoryPicker" in window)) {
+          fileStatusEl.textContent = "Tu navegador no soporta directorios locales (usa Chrome/Edge).";
           return;
         }
-        const [handle] = await window.showOpenFilePicker({
-          startIn: "documents",
-          multiple: false,
-          types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
-        });
-        fileHandle = handle;
+
+        const docsHandle = await window.showDirectoryPicker({ startIn: "documents" });
+        const ingresosHandle = await docsHandle.getDirectoryHandle("INGRESOS", { create: true });
+        const dataHandle = await ingresosHandle.getFileHandle(DATA_FILE_NAME, { create: true });
+
+        directoryHandle = ingresosHandle;
+        fileHandle = dataHandle;
+
+        await idbSet("directoryHandle", directoryHandle);
         await idbSet("fileHandle", fileHandle);
-        await loadFromFile();
+        await readDataFile();
       }
 
-      function toggleSearchPanel() {
-        const isHidden = searchPanel.classList.toggle("hidden");
-        toggleText.textContent = isHidden ? "Abrir búsqueda" : "Cerrar búsqueda";
-        toggleIcon.textContent = isHidden ? "🔎" : "🔽";
+      function getProductById(id) {
+        return state.products.find((p) => p.id === id);
       }
 
-      async function bootFile() {
-        const backup = localStorage.getItem(LOCAL_DATA_KEY);
-        data = backup ? JSON.parse(backup) : { patients: [] };
-        if (!Array.isArray(data.patients)) data = { patients: [] };
-        render();
+      function bindEditPanel(patient) {
+        byId("editPatientId").value = patient.id;
+        byId("paymentPatientId").value = patient.id;
+        byId("editTitle").textContent = `Editando: ${patient.name}`;
+        byId("editName").value = patient.name;
+        byId("editProduct").value = patient.productId;
+        byId("newPaymentDate").value = new Date().toISOString().slice(0, 10);
+      }
+
+      async function boot() {
+        const backup = localStorage.getItem(LOCAL_KEY);
+        if (backup) {
+          try {
+            const parsed = JSON.parse(backup);
+            state.products = Array.isArray(parsed.products) ? parsed.products : [];
+            state.patients = Array.isArray(parsed.patients) ? parsed.patients : [];
+          } catch {
+            state = { products: [], patients: [] };
+          }
+        }
+
+        byId("initialDate").value = new Date().toISOString().slice(0, 10);
+        byId("newPaymentDate").value = new Date().toISOString().slice(0, 10);
+
+        renderAll();
 
         try {
-          const savedHandle = await idbGet("fileHandle");
-          if (savedHandle) {
-            fileHandle = savedHandle;
-            await loadFromFile();
+          directoryHandle = await idbGet("directoryHandle");
+          fileHandle = await idbGet("fileHandle");
+          if (fileHandle) {
+            await readDataFile();
           }
         } catch {
-          fileStatusEl.textContent = "No se pudo recuperar archivo previo.";
+          fileStatusEl.textContent = "No se recuperó handle previo; usa Configurar carpeta INGRESOS.";
         }
       }
 
-      form.addEventListener("submit", async (e) => {
+      byId("toggleFileBtn").addEventListener("click", () => toggleSection(fileBody, byId("toggleFileBtn")));
+      byId("toggleSearchBtn").addEventListener("click", () => toggleSection(searchBody, byId("toggleSearchBtn")));
+
+      byId("setupFolderBtn").addEventListener("click", setupIngresosFolder);
+      byId("openDataBtn").addEventListener("click", openIngresosDataFile);
+      byId("saveDataBtn").addEventListener("click", writeDataFile);
+
+      byId("productForm").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const fd = new FormData(form);
-        const code = Number(fd.get("product"));
-        const product = products.find((p) => p.code === code);
-        const paidValue = Number.parseFloat(fd.get("paid"));
+        const name = normalize(byId("productName").value);
+        const price = Number.parseFloat(byId("productPrice").value);
 
-        const patient = {
+        if (!name || !Number.isFinite(price) || price < 0) return;
+
+        state.products.unshift({
           id: crypto.randomUUID(),
-          name: normalize(fd.get("name")),
-          productCode: product.code,
-          productName: normalize(product.name),
-          treatment: normalize(fd.get("treatment")),
-          total: product.price,
-          paid: Number.isFinite(paidValue) ? paidValue : 0,
-          date: String(fd.get("date") || ""),
-        };
+          name,
+          price,
+        });
 
-        if (!patient.name || !patient.treatment || !patient.date) return;
-        data.patients.unshift(patient);
-        render();
-        localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(data));
-        if (fileHandle) await writeFile();
-        form.reset();
-        document.getElementById("paid").value = "0";
-        document.getElementById("date").value = new Date().toISOString().slice(0, 10);
+        byId("productForm").reset();
+        renderAll();
+        await writeDataFile();
       });
 
-      document.getElementById("createFileBtn").addEventListener("click", chooseCreateFile);
-      document.getElementById("openFileBtn").addEventListener("click", chooseOpenFile);
-      document.getElementById("saveBtn").addEventListener("click", writeFile);
-      toggleSearchBtn.addEventListener("click", toggleSearchPanel);
-      searchTextEl.addEventListener("input", render);
-      searchStartDateEl.addEventListener("change", render);
-      searchEndDateEl.addEventListener("change", render);
-      clearSearchBtn.addEventListener("click", () => {
-        searchTextEl.value = "";
-        searchStartDateEl.value = "";
-        searchEndDateEl.value = "";
-        render();
+      byId("productsRows").addEventListener("click", async (e) => {
+        const button = e.target.closest("button[data-del-product]");
+        if (!button) return;
+        const id = button.getAttribute("data-del-product");
+
+        const used = state.patients.some((p) => p.productId === id);
+        if (used) {
+          alert("No se puede eliminar: hay pacientes con este producto.");
+          return;
+        }
+
+        state.products = state.products.filter((p) => p.id !== id);
+        renderAll();
+        await writeDataFile();
       });
 
-      renderProducts();
-      document.getElementById("date").value = new Date().toISOString().slice(0, 10);
-      bootFile();
+      byId("patientForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = normalize(byId("patientName").value);
+        const productId = byId("patientProduct").value;
+        const method = normalize(byId("paymentMethod").value);
+        const amount = Number.parseFloat(byId("initialPaid").value);
+        const date = byId("initialDate").value;
+
+        const product = getProductById(productId);
+        if (!name || !product || !date || !Number.isFinite(amount) || amount < 0) return;
+
+        state.patients.unshift({
+          id: crypto.randomUUID(),
+          name,
+          productId: product.id,
+          productName: product.name,
+          productPrice: product.price,
+          entryDate: date,
+          payments: [
+            {
+              id: crypto.randomUUID(),
+              type: "PAGO INICIAL",
+              amount,
+              method,
+              date,
+            },
+          ],
+        });
+
+        byId("patientForm").reset();
+        byId("initialPaid").value = "0";
+        byId("initialDate").value = new Date().toISOString().slice(0, 10);
+        renderAll();
+        await writeDataFile();
+      });
+
+      byId("patientsRows").addEventListener("click", (e) => {
+        const button = e.target.closest("button[data-edit-patient]");
+        if (!button) return;
+        const id = button.getAttribute("data-edit-patient");
+        const patient = state.patients.find((p) => p.id === id);
+        if (!patient) return;
+        bindEditPanel(patient);
+        byId("editSection").scrollIntoView({ behavior: "smooth" });
+      });
+
+      byId("editPatientForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = byId("editPatientId").value;
+        const patient = state.patients.find((p) => p.id === id);
+        if (!patient) return;
+
+        const name = normalize(byId("editName").value);
+        const productId = byId("editProduct").value;
+        const product = getProductById(productId);
+        if (!name || !product) return;
+
+        patient.name = name;
+        patient.productId = product.id;
+        patient.productName = product.name;
+        patient.productPrice = product.price;
+
+        renderAll();
+        await writeDataFile();
+      });
+
+      byId("addPaymentForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = byId("paymentPatientId").value;
+        const patient = state.patients.find((p) => p.id === id);
+        if (!patient) return;
+
+        const amount = Number.parseFloat(byId("newPaymentAmount").value);
+        const method = normalize(byId("newPaymentMethod").value);
+        const date = byId("newPaymentDate").value;
+        if (!Number.isFinite(amount) || amount <= 0 || !date) return;
+
+        patient.payments.push({
+          id: crypto.randomUUID(),
+          type: "NUEVO PAGO",
+          amount,
+          method,
+          date,
+        });
+
+        byId("addPaymentForm").reset();
+        byId("newPaymentDate").value = new Date().toISOString().slice(0, 10);
+
+        renderAll();
+        await writeDataFile();
+      });
+
+      byId("searchText").addEventListener("input", renderPatients);
+      byId("searchStartDate").addEventListener("change", renderPatients);
+      byId("searchEndDate").addEventListener("change", renderPatients);
+      byId("clearSearchBtn").addEventListener("click", () => {
+        byId("searchText").value = "";
+        byId("searchStartDate").value = "";
+        byId("searchEndDate").value = "";
+        renderPatients();
+      });
+
+      boot();
     </script>
   </body>
 </html>
