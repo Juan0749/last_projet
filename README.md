@@ -14,6 +14,8 @@ Aplicación web local para controlar pacientes, pagos y deudas.
 - Nuevo módulo de **productos manuales** (crear/eliminar), persistentes en el mismo archivo local.
 - Al crear paciente, el campo producto usa los productos manuales guardados.
 - Se puede **editar paciente** y **agregar nuevos pagos** (separados de pago inicial), mostrando historial con fechas.
+- Nuevo bloque **Pagos registrados**: guarda cada pago vinculado al nombre del paciente.
+- Cuando un paciente realiza un pago nuevo, deja de salir en alertas de faltantes recientes.
 - Alertas por deuda >10 días desde el último pago.
 - Estado de saldo en tabla: `FALTANTE` (rojo), `A FAVOR`, `AL DÍA`.
 

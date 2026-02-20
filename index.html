@@ -296,6 +296,21 @@
         </div>
       </section>
 
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Pagos registrados</h2>
+        </div>
+        <div class="card-body">
+          <table>
+            <thead>
+              <tr><th>Paciente</th><th>Tipo</th><th>Método</th><th>Monto</th><th>Fecha</th></tr>
+            </thead>
+            <tbody id="paymentsRows"></tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="card" id="editSection">
         <div class="card-header">
           <h2>Editar paciente / Añadir nuevo pago</h2>
@@ -404,6 +419,14 @@
         return '<span class="status-ok">AL DÍA</span>';
       }
 
+      function hasRecentPayment(patient) {
+        const payments = patient.payments || [];
+        if (!payments.length) return false;
+        const last = payments[payments.length - 1];
+        const days = daysDiff(last.date, new Date().toISOString().slice(0, 10));
+        return days >= 0 && days <= WARNING_DAYS;
+      }
+
       function paymentHistoryHtml(patient) {
         const payments = patient.payments || [];
         if (!payments.length) return '<span class="muted">Sin pagos</span>';
@@ -464,6 +487,7 @@
           if (debt <= 0) return false;
           const lastPaymentDate = (p.payments || []).slice(-1)[0]?.date || p.entryDate;
           const overdue = daysDiff(lastPaymentDate, today);
+          if (hasRecentPayment(p)) return false;
           return overdue > WARNING_DAYS;
         });
 
@@ -511,9 +535,33 @@
         renderWarnings();
       }
 
+      function renderPayments() {
+        const rows = byId("paymentsRows");
+        const allPayments = state.patients.flatMap((patient) =>
+          (patient.payments || []).map((pay) => ({
+            patientName: pay.patientName || patient.name,
+            type: pay.type,
+            method: pay.method,
+            amount: pay.amount,
+            date: pay.date,
+          })),
+        );
+
+        if (!allPayments.length) {
+          rows.innerHTML = "<tr><td colspan='5' class='muted'>No hay pagos registrados.</td></tr>";
+          return;
+        }
+
+        allPayments.sort((a, b) => (a.date < b.date ? 1 : -1));
+        rows.innerHTML = allPayments
+          .map((pay) => `<tr><td>${pay.patientName}</td><td>${pay.type}</td><td>${pay.method}</td><td>${fmt(pay.amount)}</td><td>${pay.date}</td></tr>`)
+          .join("");
+      }
+
       function renderAll() {
         renderProducts();
         renderPatients();
+        renderPayments();
       }
 
       async function openDb() {
@@ -716,6 +764,7 @@
               amount,
               method,
               date,
+              patientName: name,
             },
           ],
         });
@@ -774,6 +823,7 @@
           amount,
           method,
           date,
+          patientName: patient.name,
         });
 
         byId("addPaymentForm").reset();
